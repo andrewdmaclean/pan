@@ -7,21 +7,56 @@ namespace Pan\ValueObjects;
 /**
  * @internal
  */
-final readonly class Analytic
+final class Analytic
 {
     /**
-     * Returns all analytics.
-     *
-     * @return array<int, Analytic>
+     * @var int
+     */
+    public int $id;
+
+    /**
+     * @var string
+     */
+    public string $name;
+
+    /**
+     * @var int
+     */
+    public int $impressions;
+
+    /**
+     * @var int
+     */
+    public int $hovers;
+
+    /**
+     * @var int
+     */
+    public int $clicks;
+
+    /**
+     * Creates a new Analytic instance.
      */
     public function __construct(
-        public int $id,
-        public string $name,
-        public int $impressions,
-        public int $hovers,
-        public int $clicks,
+        int $id,
+        string $name,
+        int $impressions,
+        int $hovers,
+        int $clicks
     ) {
-        //
+        $this->id = $id;
+        $this->name = $name;
+        $this->impressions = $impressions;
+        $this->hovers = $hovers;
+        $this->clicks = $clicks;
+    }
+
+    /**
+     * Prevents property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 
     /**

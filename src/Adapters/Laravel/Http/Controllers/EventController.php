@@ -13,7 +13,7 @@ use Pan\Enums\EventType;
 /**
  * @internal
  */
-final readonly class EventController
+final class EventController
 {
     /**
      * Store a new event.
@@ -26,5 +26,13 @@ final readonly class EventController
         $events->each(fn (array $event) => $action->handle($event['name'], EventType::from($event['type'])));
 
         return response()->noContent();
+    }
+
+    /**
+     * Prevent property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 }

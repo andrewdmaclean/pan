@@ -80,10 +80,9 @@ final class PanServiceProvider extends ServiceProvider
     private function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
-            $this->publishesMigrations([
-                __DIR__.'/../../../../database/migrations' => database_path('migrations'),
-            ], 'pan-migrations');
+            $this->loadMigrationsFrom(__DIR__.'/../../../../database/migrations');
         }
+
     }
 
     /**

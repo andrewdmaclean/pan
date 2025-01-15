@@ -10,7 +10,7 @@ use Pan\Enums\EventType;
 /**
  * @internal
  */
-final readonly class CreateEvent
+final class CreateEvent
 {
     /**
      * Creates a new action instance.
@@ -18,7 +18,7 @@ final readonly class CreateEvent
     public function __construct(
         private AnalyticsRepository $repository,
     ) {
-        //
+        $this->repository = $repository;
     }
 
     /**
@@ -27,5 +27,13 @@ final readonly class CreateEvent
     public function handle(string $name, EventType $event): void
     {
         $this->repository->increment($name, $event);
+    }
+
+     /**
+     * Prevents property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 }

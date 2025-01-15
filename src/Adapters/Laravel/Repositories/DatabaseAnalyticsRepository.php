@@ -9,18 +9,22 @@ use Pan\Contracts\AnalyticsRepository;
 use Pan\Enums\EventType;
 use Pan\PanConfiguration;
 use Pan\ValueObjects\Analytic;
-
 /**
  * @internal
  */
-final readonly class DatabaseAnalyticsRepository implements AnalyticsRepository
+final class DatabaseAnalyticsRepository implements AnalyticsRepository
 {
+    /**
+     * @var PanConfiguration
+     */
+    private PanConfiguration $config;
+
     /**
      * Creates a new analytics repository instance.
      */
-    public function __construct(private PanConfiguration $config)
+    public function __construct(PanConfiguration $config)
     {
-        //
+        $this->config = $config;
     }
 
     /**
@@ -32,11 +36,11 @@ final readonly class DatabaseAnalyticsRepository implements AnalyticsRepository
     {
         /** @var array<int, Analytic> $all */
         $all = DB::table('pan_analytics')->get()->map(fn (mixed $analytic): Analytic => new Analytic(
-            id: (int) $analytic->id, // @phpstan-ignore-line
-            name: $analytic->name, // @phpstan-ignore-line
-            impressions: (int) $analytic->impressions, // @phpstan-ignore-line
-            hovers: (int) $analytic->hovers, // @phpstan-ignore-line
-            clicks: (int) $analytic->clicks, // @phpstan-ignore-line
+            id: (int) $analytic->id,
+            name: $analytic->name,
+            impressions: (int) $analytic->impressions,
+            hovers: (int) $analytic->hovers,
+            clicks: (int) $analytic->clicks,
         ))->toArray();
 
         return $all;
@@ -52,7 +56,7 @@ final readonly class DatabaseAnalyticsRepository implements AnalyticsRepository
             'max_analytics' => $maxAnalytics,
         ] = $this->config->toArray();
 
-        if (count($allowedAnalytics) > 0 && ! in_array($name, $allowedAnalytics, true)) {
+        if (!empty($allowedAnalytics) && !in_array($name, $allowedAnalytics, true)) {
             return;
         }
 
@@ -73,5 +77,13 @@ final readonly class DatabaseAnalyticsRepository implements AnalyticsRepository
     public function flush(): void
     {
         DB::table('pan_analytics')->truncate();
+    }
+
+    /**
+     * Prevent property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 }

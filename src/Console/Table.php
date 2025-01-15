@@ -10,15 +10,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @internal
  */
-final readonly class Table
+final class Table
 {
+    /**
+     * @var OutputInterface
+     */
+    private OutputInterface $output;
+
     /**
      * Creates a new instance of the table.
      */
     public function __construct(
-        private OutputInterface $output,
+        OutputInterface $output,
     ) {
-        //
+        $this->output = $output;
     }
 
     /**
@@ -36,13 +41,13 @@ final readonly class Table
         $table->setStyle('compact');
 
         $table->setHeaders(array_map(
-            fn ($header): string => "   <fg=#FC6AFF;options=bold>$header</>",
+            fn($header): string => "   <fg=#FC6AFF;options=bold>$header</>",
             $headers
         ));
 
         $table->setRows(array_map(
-            fn ($row): array => array_map(
-                fn ($cell): string => "   $cell",
+            fn($row): array => array_map(
+                fn($cell): string => "   $cell",
                 $row
             ),
             $rows
@@ -51,5 +56,13 @@ final readonly class Table
         $table->render();
 
         $this->output->writeln('');
+    }
+
+    /**
+     * Prevent property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 }

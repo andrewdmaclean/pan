@@ -13,14 +13,20 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @internal
  */
-final readonly class InjectJavascriptLibrary
+final class InjectJavascriptLibrary
 {
+    /**
+     * @var PanConfiguration
+     */
+    private PanConfiguration $config;
+
+
     /**
      * Creates a new middleware instance.
      */
-    public function __construct(private PanConfiguration $config)
+    public function __construct(PanConfiguration $config)
     {
-        //
+        $this->config = $config;
     }
 
     /**
@@ -58,7 +64,8 @@ final readonly class InjectJavascriptLibrary
         $response->setContent(
             str_replace(
                 '</body>',
-                sprintf(<<<'HTML'
+                sprintf(
+                    <<<'HTML'
                             <script>
                                 %s
                             </script>
@@ -67,7 +74,7 @@ final readonly class InjectJavascriptLibrary
                     str_replace(
                         ['%_PAN_CSRF_TOKEN_%', '%_PAN_ROUTE_PREFIX_%'],
                         [(string) csrf_token(), $routePrefix],
-                        File::get(__DIR__.'/../../../../../resources/js/dist/pan.iife.js')
+                        File::get(__DIR__ . '/../../../../../resources/js/dist/pan.iife.js')
                     ),
                 ),
                 (string) $response->getContent(),
@@ -77,5 +84,13 @@ final readonly class InjectJavascriptLibrary
         if ($original !== null) {
             $response->original = $original; // @phpstan-ignore-line
         }
+    }
+
+    /**
+     * Prevent property reassignment after construction.
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Cannot modify readonly property: ' . $name);
     }
 }
